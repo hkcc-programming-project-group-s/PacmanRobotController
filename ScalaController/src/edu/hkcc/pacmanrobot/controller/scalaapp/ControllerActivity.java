@@ -6,9 +6,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import hkccpacmanrobot.utils.Config;
-import hkccpacmanrobot.utils.Maths;
-import hkccpacmanrobot.utils.message.MovementCommand;
+import studentrobot.code.Config;
+import studentrobot.code.MovementCommand;
+
+import static  studentrobot.code.Maths.Point2D;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -133,7 +134,7 @@ public class ControllerActivity extends Activity {
                         Log.w("DEBUG", "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")");
                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                         while (true) {
-                            out.writeObject(new MovementCommand((byte) 0x01, new Maths.Point2D(direction, distance)));
+                            out.writeObject(new MovementCommand(new Point2D(direction, distance)));
                             Thread.sleep(50);
                         }
                     } catch (IOException e) {

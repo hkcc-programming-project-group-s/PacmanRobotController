@@ -18,7 +18,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../utils.jar!/" />
+          <root url="jar://$MODULE_DIR$/../unitTest.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
