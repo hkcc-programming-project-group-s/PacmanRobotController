@@ -4,7 +4,6 @@
     <facet type="android" name="Android">
       <configuration>
         <option name="UPDATE_PROPERTY_FILES" value="true" />
-        <option name="ENABLE_PRE_DEXING" value="false" />
       </configuration>
     </facet>
   </component>
@@ -25,6 +24,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="scala-sdk-2.11.6" level="application" />
   </component>
 </module>

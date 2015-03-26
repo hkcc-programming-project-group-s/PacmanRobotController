@@ -105,7 +105,7 @@ public class ControllerActivity extends Activity {
                 socket.connect(new InetSocketAddress(MainActivity.getServerHostName(), MainActivity.getServerPort()));
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 while (true) {
-                    out.writeObject(new MovementCommand(MovementCommand.MODE_POLAR(), new Maths.Point2D(direction, distance)));
+                    out.writeObject(new MovementCommand((byte)0x01, new Maths.Point2D(direction, distance)));
                     Thread.sleep(50);
                 }
             } catch (IOException e) {
