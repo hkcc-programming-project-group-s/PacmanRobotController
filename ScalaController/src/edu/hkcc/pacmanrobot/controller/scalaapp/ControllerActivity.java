@@ -1,30 +1,45 @@
 package edu.hkcc.pacmanrobot.controller.scalaapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import hkccpacmanrobot.utils.Config;
 import hkccpacmanrobot.utils.Maths;
 import hkccpacmanrobot.utils.message.MovementCommand;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 
 /**
  * Created by beenotung on 3/26/15.
  */
+
 public class ControllerActivity extends Activity {
+    public ControllerActivity controllerActivity;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controller);
         setTitle("Controller");
         addListener();
+        controllerActivity = this;
     }
 
+    Sender sender = new Sender(this);
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        controllerActivity = this;
+        sender.start();
+    }
 
     public final double RADIUS = 5d;
 
@@ -96,25 +111,40 @@ public class ControllerActivity extends Activity {
     public double direction = 0d;
     public double distance = 0d;
 
-    public Thread sender = new Thread(new Runnable() {
+    public class Sender extends Thread {
+        private final Context context;
+
+        public Sender(Context context) {
+            this.context = context;
+        }
+
         @Override
         public void run() {
-
-            Socket socket = new Socket();
+            super.run();
             try {
-                socket.connect(new InetSocketAddress(MainActivity.getServerHostName(), MainActivity.getServerPort()));
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                ServerSocket serverSocket = new ServerSocket(Config.PORT_MOVEMENT_COMMAND);
                 while (true) {
-                    out.writeObject(new MovementCommand((byte)0x01, new Maths.Point2D(direction, distance)));
-                    Thread.sleep(50);
+                    //Toast.makeText(context, "listen connect from port : " + serverSocket.getLocalPort(), Toast.LENGTH_SHORT).show();
+                    Log.w("DEBUG", "listen connect from port : " + serverSocket.getLocalPort());
+                    Socket socket = serverSocket.accept();
+                    try {
+                        //socket.connect(new InetSocketAddress(MainActivity.getServerHostName(), MainActivity.getServerPort()));
+                        //    Toast.makeText(context, "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")", Toast.LENGTH_SHORT).show();
+                        Log.w("DEBUG", "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")");
+                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                        while (true) {
+                            out.writeObject(new MovementCommand((byte) 0x01, new Maths.Point2D(direction, distance)));
+                            Thread.sleep(50);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
-    });
-
-
+    }
 }
