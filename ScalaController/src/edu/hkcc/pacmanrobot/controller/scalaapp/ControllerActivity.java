@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 import static studentrobot.code.Maths.Point2D;
 
@@ -143,8 +144,11 @@ public class ControllerActivity extends Activity {
                         Log.w("DEBUG", "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")");
                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                         while (true) {
-                            out.writeObject(new MovementCommand(new Point2D(direction, distance)));
-                            direction=direction=0d;
+                            if (socket.isClosed()) throw new SocketException();
+                            MovementCommand message = new MovementCommand(new Point2D(direction, distance));
+                            out.writeObject(message);
+                            //distance= direction = 0d;
+                            //Log.w("DEBUG", "sent " + message.toString());
                             Thread.sleep(Config.MOVEMENT_COMMAND_INTERVAL);
                         }
                     } catch (IOException | InterruptedException e) {
