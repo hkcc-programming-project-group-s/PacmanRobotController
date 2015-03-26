@@ -1,10 +1,10 @@
 package edu.hkcc.pacmanrobot.pacmanrobotcontroller;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,18 +12,37 @@ import android.widget.Button;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import hkccpacmanrobot.utils.Maths;
 import hkccpacmanrobot.utils.message.MovementCommand;
-import hkccpacmanrobot.utils.message.MovementCommand$;
-import hkccpacmanrobot.utils.message.Messenger;
-import hkccpacmanrobot.utils.message.Messenger$;
 
 
-public class ControllerActivity extends ActionBarActivity {
+public class ControllerActivity extends Activity {
+    public final double RADIUS = 5d;
+    public double direction = 0d;
+    public double distance = 0d;
+    public Thread sender = new Thread(new Runnable() {
+        @Override
+        public void run() {
+
+            Socket socket = new Socket();
+            try {
+                socket.connect(new InetSocketAddress(MainActivity.getServerHostName(), MainActivity.getServerPort()));
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                while (true) {
+                    out.writeObject(new MovementCommand((byte) 1, new Maths.Point2D(direction, distance)));
+                    Thread.sleep(50);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+
     public void stopGame(View view) {
         new AlertDialog.Builder(this)
                 .setTitle("Stop Game")
@@ -49,8 +68,6 @@ public class ControllerActivity extends ActionBarActivity {
         setTitle("Controller");
         addListener();
     }
-
-    public final double RADIUS = 5d;
 
     public void addListener() {
         ((Button) findViewById(R.id.button_UP)).setOnClickListener(new View.OnClickListener() {
@@ -117,29 +134,6 @@ public class ControllerActivity extends ActionBarActivity {
         });
     }
 
-    public double direction = 0d;
-    public double distance = 0d;
-
-public Thread sender=new Thread(new Runnable() {
-    @Override
-    public void run() {
-
-        Socket socket=new Socket();
-        try {
-            socket.connect(new InetSocketAddress(MainActivity.getServerHostName(),MainActivity.getServerPort()));
-            ObjectOutputStream out=new ObjectOutputStream(socket.getOutputStream());
-            while (true)
-            {
-                out.writeObject(new MovementCommand(MovementCommand.MODE_POLAR(),new Maths.Point2D(direction,distance)));
-                Thread.sleep(50);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-});
     public void pauseGame(View view) {
         startActivity(new Intent(this, PauseActivity.class));
     }
