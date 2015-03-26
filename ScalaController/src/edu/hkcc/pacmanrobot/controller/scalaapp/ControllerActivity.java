@@ -9,12 +9,12 @@ import android.widget.Button;
 import studentrobot.code.Config;
 import studentrobot.code.MovementCommand;
 
-import static  studentrobot.code.Maths.Point2D;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import static studentrobot.code.Maths.Point2D;
 
 
 /**
@@ -40,6 +40,16 @@ public class ControllerActivity extends Activity {
         super.onResume();
         controllerActivity = this;
         sender.start();
+    }
+
+    @Override
+    protected void onPause() {
+        try {
+            sender.serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.onPause();
     }
 
     public final double RADIUS = 5d;
@@ -119,27 +129,25 @@ public class ControllerActivity extends Activity {
             this.context = context;
         }
 
+        public ServerSocket serverSocket;
+
         @Override
         public void run() {
             super.run();
             try {
-                ServerSocket serverSocket = new ServerSocket(Config.PORT_MOVEMENT_COMMAND);
+                serverSocket = new ServerSocket(Config.PORT_MOVEMENT_COMMAND);
                 while (true) {
-                    //Toast.makeText(context, "listen connect from port : " + serverSocket.getLocalPort(), Toast.LENGTH_SHORT).show();
-                    Log.w("DEBUG", "listen connect from port : " + serverSocket.getLocalPort());
-                    Socket socket = serverSocket.accept();
                     try {
-                        //socket.connect(new InetSocketAddress(MainActivity.getServerHostName(), MainActivity.getServerPort()));
-                        //    Toast.makeText(context, "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")", Toast.LENGTH_SHORT).show();
+                        Log.w("DEBUG", "listen connect from port : " + serverSocket.getLocalPort());
+                        Socket socket = serverSocket.accept();
                         Log.w("DEBUG", "connected to " + socket.getInetAddress().getHostName() + " (" + socket.getInetAddress().getHostAddress() + ")");
                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                         while (true) {
                             out.writeObject(new MovementCommand(new Point2D(direction, distance)));
-                            Thread.sleep(50);
+                            direction=direction=0d;
+                            Thread.sleep(Config.MOVEMENT_COMMAND_INTERVAL);
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
+                    } catch (IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
