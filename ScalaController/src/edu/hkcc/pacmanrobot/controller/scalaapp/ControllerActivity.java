@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import studentrobot.code.Config;
-import studentrobot.code.MovementCommand;
+import edu.hkcc.pacmanrobot.utils.Config;
+import edu.hkcc.pacmanrobot.utils.Point2D;
+import edu.hkcc.pacmanrobot.utils.message.MovementCommand;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -15,7 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import static studentrobot.code.Maths.Point2D;
+
 
 
 /**
@@ -146,13 +147,14 @@ public class ControllerActivity extends Activity {
                         while (true) {
                             if (socket.isClosed()) throw new SocketException();
                             MovementCommand message = new MovementCommand(new Point2D(direction, distance));
+                            //Double message=direction;
                             out.writeObject(message);
                             //distance= direction = 0d;
-                            //Log.w("DEBUG", "sent " + message.toString());
+                            Log.w("DEBUG", "sent " + message.toString());
                             Thread.sleep(Config.MOVEMENT_COMMAND_INTERVAL);
                         }
                     } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
             } catch (IOException e) {
